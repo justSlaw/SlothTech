@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>PLUSFLIX - Panel Administratora</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h1>👑 PLUSFLIX</h1>
+            <p class="admin-subtitle">Panel Administratora</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="admin.html" class="nav-item active">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="admin-movies.html" class="nav-item">
+                <span>🎬</span> Filmy
+            </a>
+            <a href="admin-series.html" class="nav-item">
+                <span>📺</span> Seriale
+            </a>
+            <a href="admin-users.html" class="nav-item">
+                <span>👥</span> Użytkownicy
+            </a>
+            <a href="admin-reviews.html" class="nav-item">
+                <span>⭐</span> Recenzje
+            </a>
+            <a href="admin-settings.html" class="nav-item">
+                <span>⚙️</span> Ustawienia
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="index.html" class="btn-back">
+                ← Powrót do strony głównej
+            </a>
+            <button class="btn-logout" id="logoutBtn">
+                🚪 Wyloguj
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <h2>Dashboard</h2>
+                <p class="header-subtitle">Witaj w panelu administratora</p>
+            </div>
+            <div class="header-right">
+                <div class="admin-profile">
+                    <span class="profile-name">Administrator</span>
+                    <div class="profile-avatar">👑</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Statystyki -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🎬</div>
+                <div class="stat-info">
+                    <h3 id="moviesCount">0</h3>
+                    <p>Filmy</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📺</div>
+                <div class="stat-info">
+                    <h3 id="seriesCount">0</h3>
+                    <p>Seriale</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-info">
+                    <h3 id="reviewsCount">0</h3>
+                    <p>Recenzje</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3 id="usersCount">1</h3>
+                    <p>Użytkownicy</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Szybkie akcje -->
+        <section class="quick-actions">
+            <h3>Szybkie akcje</h3>
+            <div class="actions-grid">
+                <button class="action-btn" id="addMovieBtn">
+                    <span>➕</span>
+                    Dodaj film
+                </button>
+                <button class="action-btn" id="addSeriesBtn">
+                    <span>➕</span>
+                    Dodaj serial
+                </button>
+                <button class="action-btn" id="manageContentBtn">
+                    <span>📋</span>
+                    Zarządzaj treścią
+                </button>
+                <button class="action-btn" id="viewLogsBtn">
+                    <span>📊</span>
+                    Logi systemowe
+                </button>
+            </div>
+        </section>
+
+        <!-- Ostatnio dodane -->
+        <section class="recent-content">
+            <h3>Ostatnio dodane</h3>
+            <div class="content-list" id="recentContent"></div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal do dodawania filmu -->
+<div class="modal" id="addMovieModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>➕ Dodaj nowy film</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Formularz dodawania filmu -->
+            <!-- (możesz użyć tego samego co wcześniej) -->
+        </div>
+    </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
