@@ -18,6 +18,11 @@ const overlaySearchInput = document.getElementById("overlaySearchInput");
 const searchResults = document.getElementById("searchResults");
 const allItems = [...movies, ...series];
 
+//to na później do bazy danych z api
+//let movies =[];
+//let series = [];
+//let allItems = [];
+
 let userReviewRating = 0;
 
 // renderowanie kart filmów/seriali
