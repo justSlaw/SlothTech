@@ -1,11 +1,12 @@
-const movies = [
-    { id:1, title:"Incepcja", originalTitle:"Inception", year:2010, duration:"148 min", genres:["Sci-Fi","Thriller","Akcja"], director:"Christopher Nolan", cast:["Leonardo DiCaprio","Marion Cotillard","Tom Hardy","Elliot Page"], type:"movie", rating:8.8, platforms:[{name:"Netflix", type:"Subskrypcja"},{name:"HBO Max", type:"Subskrypcja"}], description:"Dom Cobb jest najlepszym ze złodziei specjalizujących się w wykradaniu sekretów ze snów..." },
-    { id:2, title:"Interstellar", originalTitle:"Interstellar", year:2014, duration:"169 min", genres:["Sci-Fi","Drama","Adventure"], director:"Christopher Nolan", cast:["Matthew McConaughey","Anne Hathaway","Jessica Chastain"], type:"movie", rating:8.6, platforms:[{name:"HBO Max", type:"Subskrypcja"},{name:"Apple TV", type:"Subskrypcja"}], description:"Grupa astronautów podróżuje przez kosmos, aby znaleźć nowy dom dla ludzkości." }
-];
-
-const series = [
-    { id:101, title:"Breaking Bad", originalTitle:"Breaking Bad", year:2008, duration:"62 odcinki", genres:["Crime","Drama","Thriller"], director:"Vince Gilligan", cast:["Bryan Cranston","Aaron Paul","Anna Gunn"], type:"series", rating:9.5, platforms:[{name:"Netflix", type:"Subskrypcja"}], description:"Nauczyciel chemii zostaje producentem narkotyków." }
-];
+//to jest na sztywno
+// const movies = [
+//     { id:1, title:"Incepcja", originalTitle:"Inception", year:2010, duration:"148 min", genres:["Sci-Fi","Thriller","Akcja"], director:"Christopher Nolan", cast:["Leonardo DiCaprio","Marion Cotillard","Tom Hardy","Elliot Page"], type:"movie", rating:8.8, platforms:[{name:"Netflix", type:"Subskrypcja"},{name:"HBO Max", type:"Subskrypcja"}], description:"Dom Cobb jest najlepszym ze złodziei specjalizujących się w wykradaniu sekretów ze snów..." },
+//     { id:2, title:"Interstellar", originalTitle:"Interstellar", year:2014, duration:"169 min", genres:["Sci-Fi","Drama","Adventure"], director:"Christopher Nolan", cast:["Matthew McConaughey","Anne Hathaway","Jessica Chastain"], type:"movie", rating:8.6, platforms:[{name:"HBO Max", type:"Subskrypcja"},{name:"Apple TV", type:"Subskrypcja"}], description:"Grupa astronautów podróżuje przez kosmos, aby znaleźć nowy dom dla ludzkości." }
+// ];
+//
+// const series = [
+//     { id:101, title:"Breaking Bad", originalTitle:"Breaking Bad", year:2008, duration:"62 odcinki", genres:["Crime","Drama","Thriller"], director:"Vince Gilligan", cast:["Bryan Cranston","Aaron Paul","Anna Gunn"], type:"series", rating:9.5, platforms:[{name:"Netflix", type:"Subskrypcja"}], description:"Nauczyciel chemii zostaje producentem narkotyków." }
+// ];
 
 const moviesEl = document.getElementById("movies");
 const seriesEl = document.getElementById("series");
@@ -16,14 +17,30 @@ const submitReview = document.getElementById("submitReview");
 const searchOverlay = document.getElementById("searchOverlay");
 const overlaySearchInput = document.getElementById("overlaySearchInput");
 const searchResults = document.getElementById("searchResults");
-const allItems = [...movies, ...series];
+//const allItems = [...movies, ...series];
 
-//to na później do bazy danych z api
-//let movies =[];
-//let series = [];
-//let allItems = [];
+//to do bazy danych z api
+let movies =[];
+let series = [];
+let allItems = [];
 
 let userReviewRating = 0;
+//fetch z bazy danych
+fetch("/api/items.php")
+    .then(res => res.json())
+    .then(items => {
+        // podział na filmy i seriale
+        movies = items.filter(item => item.type === "movie");
+        series = items.filter(item => item.type === "series");
+        allItems = items;
+
+        // render
+        render(movies, moviesEl);
+        render(series, seriesEl);
+    })
+    .catch(err => {
+        console.error("Błąd pobierania danych:", err);
+    });
 
 // renderowanie kart filmów/seriali
 function render(items, container){
@@ -38,8 +55,9 @@ function render(items, container){
         </article>`;
     });
 }
-render(movies, moviesEl);
-render(series, seriesEl);
+//to można odpalić kiedy robimy na sztywno
+//render(movies, moviesEl);
+//render(series, seriesEl);
 
 // funkcja renderująca gwiazdki
 function renderStars(container, rating = 0, interactive = false) {
