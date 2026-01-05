@@ -195,13 +195,18 @@ document.addEventListener("click", e => {
         genresEl.appendChild(span);
     });
 
+    //small fix, źle łapało arraya z platformami
     const platformsEl = document.getElementById("fullPlatforms");
     platformsEl.innerHTML = "";
-    if(item.platforms) item.platforms.forEach(p=>{
-        const div = document.createElement("div");
-        div.textContent = `${p.name} - ${p.type}`;
-        platformsEl.appendChild(div);
-    });
+    if (Array.isArray(item.platforms)) {
+        item.platforms.forEach(p => {
+            const div = document.createElement("div");
+            div.textContent = `${p.name} - ${p.type}`;
+            platformsEl.appendChild(div);
+        });
+    } else {
+        platformsEl.textContent = "Brak informacji o platformach";
+    }
 
     reviewsList.innerHTML = "";
     userReviewRating = 0;
