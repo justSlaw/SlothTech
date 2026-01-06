@@ -46,8 +46,9 @@ fetch("/api/items.php")
 function render(items, container){
     container.innerHTML = "";
     items.forEach(item => {
+        const posterSrc = `/public/img/${item.id}.jpg`;
         container.innerHTML += `<article class="card" data-id="${item.id}">
-            <div class="poster ${item.type}"></div>
+            <img class="poster ${item.type}" src="${posterSrc}" alt="${item.title}" onerror="this.onerror=null; this.src='/public/img/placeholder.svg';" />
             <div class="card-info">
                 <h3>${item.title}</h3>
                 <span class="rating">⭐ ${item.rating}</span>
@@ -220,8 +221,9 @@ window.addEventListener("click", e => { if(e.target===fullOverlay) fullOverlay.s
 function renderSearchResults(items){
     searchResults.innerHTML="";
     items.forEach(item=>{
+        const posterSrc = `/public/img/${item.id}.jpg`;
         searchResults.innerHTML+=`<article class="card" data-id="${item.id}">
-            <div class="poster ${item.type}"></div>
+            <img class="poster ${item.type}" src="${posterSrc}" alt="${item.title}" onerror="this.onerror=null; this.src='/public/img/placeholder.svg';" />
             <div class="card-info">
                 <h3>${item.title}</h3>
                 <span class="rating">⭐ ${item.rating}</span>
