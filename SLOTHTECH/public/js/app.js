@@ -264,17 +264,90 @@ function renderSearchResults(items) {
     });
 }
 
+// Get unique genres from all items
+function getUniqueGenres() {
+    const genresSet = new Set();
+    allItems.forEach(item => {
+        if (Array.isArray(item.genres)) {
+            item.genres.forEach(g => genresSet.add(g));
+        }
+    });
+    return Array.from(genresSet).sort();
+}
+
+function createGenreFilters() {
+    const searchHeader = document.querySelector(".search-header");
+    const filterDiv = document.createElement("div");
+    filterDiv.id = "genreFilters";
+    filterDiv.className = "genre-filters";
+    
+    const label = document.createElement("p");
+    label.textContent = "Filtry:";
+    label.style.marginTop = "1rem";
+    label.style.marginBottom = "0.5rem";
+    label.style.color = "#cbd5e1";
+    label.style.fontSize = "0.9rem";
+    
+    filterDiv.appendChild(label);
+    
+    const genres = getUniqueGenres();
+    genres.forEach(genre => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = genre;
+        checkbox.id = `genre-${genre}`;
+        checkbox.addEventListener("change", performAdvancedSearch);
+        
+        const genreLabel = document.createElement("label");
+        genreLabel.htmlFor = `genre-${genre}`;
+        genreLabel.textContent = genre;
+        genreLabel.style.marginRight = "1rem";
+        genreLabel.style.marginBottom = "0.5rem";
+        genreLabel.style.display = "inline-block";
+        genreLabel.style.color = "#e2e8f0";
+        genreLabel.style.cursor = "pointer";
+        
+        filterDiv.appendChild(checkbox);
+        filterDiv.appendChild(genreLabel);
+    });
+    
+    searchHeader.appendChild(filterDiv);
+}
+
+function performAdvancedSearch() {
+    const q = overlaySearchInput.value.toLowerCase();
+    const selectedGenres = Array.from(
+        document.querySelectorAll("#genreFilters input[type='checkbox']:checked")
+    ).map(cb => cb.value);
+    
+    const filtered = allItems.filter(item => {
+        // Match title
+        const titleMatch = item.title.toLowerCase().includes(q);
+        
+        // Match genres
+        const genreMatch = selectedGenres.length === 0 || 
+            (Array.isArray(item.genres) && 
+             selectedGenres.some(g => item.genres.includes(g)));
+        
+        return titleMatch && genreMatch;
+    });
+    
+    renderSearchResults(filtered);
+}
+
 document.getElementById("openSearch").onclick = () => {
     searchOverlay.style.display = "flex";
     overlaySearchInput.value = "";
+    
+    // Initialize genre filters if not already done
+    if (!document.getElementById("genreFilters")) {
+        createGenreFilters();
+    }
+    
     renderSearchResults(allItems);
     overlaySearchInput.focus();
 };
 
 document.getElementById("closeSearch").onclick = () => searchOverlay.style.display = "none";
 
-overlaySearchInput.addEventListener("input", () => {
-    const q = overlaySearchInput.value.toLowerCase();
-    const filtered = allItems.filter(item => item.title.toLowerCase().includes(q));
-    renderSearchResults(filtered);
-});
+overlaySearchInput.addEventListener("input", performAdvancedSearch);
