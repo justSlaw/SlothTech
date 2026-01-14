@@ -351,3 +351,11 @@ document.getElementById("openSearch").onclick = () => {
 document.getElementById("closeSearch").onclick = () => searchOverlay.style.display = "none";
 
 overlaySearchInput.addEventListener("input", performAdvancedSearch);
+
+//Change Site Theme
+const buttons = document.querySelectorAll(".theme-switcher button");
+buttons.forEach(button => {
+    button.addEventListener("click", () => {
+        document.body.className = button.dataset.theme;
+    });
+});
