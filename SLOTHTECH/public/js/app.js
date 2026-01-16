@@ -152,48 +152,47 @@ submitReview.addEventListener("click", () => {
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({item_id: itemId, rating: userReviewRating, text})
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            const div = document.createElement("div");
-            div.classList.add("review-item");
+   .then(res => res.json())
+.then(data => {
+    if (data.success) {
+        const div = document.createElement("div");
+        div.classList.add("review-item");
 
-            // gwiazdki w recenzji
-            const starsDiv = document.createElement("div");
-	    starsDiv.classList.add("review-stars");
-            starsDiv.dataset.rating = userReviewRating; // zapisujemy ocenę
-            for (let i = 1; i <= 10; i++) {
-                const star = document.createElement("span");
-                star.textContent = "★";
-                star.style.color = i <= userReviewRating ? "gold" : "lightgray"; // kolor wg oceny
-                starsDiv.appendChild(star);
-}
-
-
-            // tekst recenzji
-            const textDiv = document.createElement("div");
-            textDiv.classList.add("review-text");
-            textDiv.textContent = text;
-
-            // data recenzji
-            const dateDiv = document.createElement("div");
-            dateDiv.classList.add("review-date");
-            dateDiv.textContent = new Date().toLocaleString('pl-PL');
-
-            div.appendChild(starsDiv);
-            div.appendChild(textDiv);
-            div.appendChild(dateDiv);
-
-            reviewsList.prepend(div);
-
-            // reset formularza
-            userReviewRating = 0;
-            reviewInput.value = "";
-            renderStars(document.getElementById("reviewStars"), 0, true);
-        } else {
-            alert("Błąd przy zapisywaniu recenzji");
+        // gwiazdki w recenzji
+        const starsDiv = document.createElement("div");
+        starsDiv.classList.add("review-stars");
+        starsDiv.dataset.rating = userReviewRating;
+        for (let i = 1; i <= 10; i++) {
+            const star = document.createElement("span");
+            star.textContent = "★";
+            star.style.color = i <= userReviewRating ? "gold" : "lightgray";
+            starsDiv.appendChild(star);
         }
+
+        const textDiv = document.createElement("div");
+        textDiv.classList.add("review-text");
+        textDiv.textContent = text;
+
+        const dateDiv = document.createElement("div");
+        dateDiv.classList.add("review-date");
+        dateDiv.textContent = new Date().toLocaleString('pl-PL');
+
+        div.appendChild(starsDiv);
+        div.appendChild(textDiv);
+        div.appendChild(dateDiv);
+
+        reviewsList.prepend(div);
+
+        userReviewRating = 0;
+        reviewInput.value = "";
+        renderStars(document.getElementById("reviewStars"), 0, true);
+
+    } else {
+      
+        alert(data.error || "Błąd przy zapisywaniu recenzji");
+    }
     });
+
 });
 
 // ===== SZCZEGÓŁY FILMU / SERIALU =====

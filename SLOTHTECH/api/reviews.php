@@ -20,8 +20,27 @@ if ($method === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     if (!$data || !isset($data['item_id']) || !isset($data['rating'])) {
         http_response_code(400);
-        echo json_encode(["error" => "Brak danych"]);
+        echo json_encode([
+            "success" => false,
+            "error" => "Brak danych"
+        ]);
+
         exit;
+    }
+        $text = trim($data['text'] ?? '');
+
+    $blacklist = ['kurwa','chuj','debil','idiota','pizda','cwel','nigger'
+    ];
+
+    foreach ($blacklist as $bad) {
+        if (stripos($text, $bad) !== false) {
+            http_response_code(400);
+            echo json_encode([
+                "success" => false,
+                "error" => "Recenzja zawiera niedozwolone słowa"
+            ]);
+            exit;
+        }
     }
 
     $stmt = $db->prepare("
@@ -57,5 +76,9 @@ if ($method === 'POST') {
 
 } else {
     http_response_code(405);
-    echo json_encode(["error" => "Method not allowed"]);
+    echo json_encode([
+        "success" => false,
+        "error" => "Method not allowed"
+    ]);
+
 }
