@@ -111,7 +111,7 @@ button { font-family: inherit;}
         border-radius: 20px;
         display: flex;
         align-items: center;
-        gap: 0.3rem; /
+        gap: 0.3rem; 
         text-decoration: none;
         color: var(--text);
         opacity: .7;
@@ -250,4 +250,72 @@ body.theme-colorblind {
 
     /* Font */
     --font-size: 16px;
+}
+.stats-container {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #a0aec0;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4fd1c7;
+}
+
+/* Stylowanie przycisków like/dislike */
+.review-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.like-btn, .dislike-btn {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #4a5568;
+    background: transparent;
+    color: #cbd5e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+}
+
+.like-btn:hover {
+    background: #38a169;
+    border-color: #38a169;
+    color: white;
+}
+
+.dislike-btn:hover {
+    background: #e53e3e;
+    border-color: #e53e3e;
+    color: white;
+}
+
+.like-btn.liked {
+    background: #38a169;
+    border-color: #38a169;
+    color: white;
+}
+
+.dislike-btn.disliked {
+    background: #e53e3e;
+    border-color: #e53e3e;
+    color: white;
 }
