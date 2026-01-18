@@ -98,11 +98,26 @@
 
 <!-- SEARCH OVERLAY -->
 <div class="search-overlay" id="searchOverlay">
-    <div class="search-header">
-        <input type="text" id="overlaySearchInput" placeholder="Szukaj filmu lub serialu..." autofocus>
-        <button id="closeSearch">✕</button>
+    <div class="search-main">
+        <div class="search-top">
+            <input type="text" id="overlaySearchInput" placeholder="Szukaj filmu lub serialu..." autofocus>
+            <button id="closeSearch">✕</button>
+        </div>
+        
+        <div class="filters-container">
+            <div class="filter-section" id="genreFiltersSection">
+                <h3>Gatunki:</h3>
+                <div id="genreFilters" class="filter-options"></div>
+            </div>
+            
+            <div class="filter-section" id="platformFiltersSection">
+                <h3>Platformy:</h3>
+                <div id="platformFilters" class="filter-options"></div>
+            </div>
+        </div>
+        
+        <div class="search-results" id="searchResults"></div>
     </div>
-    <div class="search-results" id="searchResults"></div>
 </div>
 
 <script src="js/app.js"></script>

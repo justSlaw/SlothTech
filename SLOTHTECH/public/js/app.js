@@ -459,56 +459,143 @@ function getUniqueGenres() {
 }
 
 function createGenreFilters() {
-    const searchHeader = document.querySelector(".search-header");
-    const filterDiv = document.createElement("div");
-    filterDiv.id = "genreFilters";
-    filterDiv.className = "genre-filters";
+    const container = document.getElementById("genreFilters");
+    if (!container) return;
     
-    const label = document.createElement("p");
-    label.textContent = "Filtry:";
-    label.style.marginTop = "1rem";
-    label.style.marginBottom = "0.5rem";
-    label.style.color = "#cbd5e1";
-    label.style.fontSize = "0.9rem";
-    filterDiv.appendChild(label);
-    
+    container.innerHTML = "";
     const genres = getUniqueGenres();
+    
     genres.forEach(genre => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "filter-checkbox";
+        
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.value = genre;
-        checkbox.id = `genre-${genre}`;
+        checkbox.className = "genre-checkbox";
         checkbox.addEventListener("change", performAdvancedSearch);
         
-        const genreLabel = document.createElement("label");
-        genreLabel.htmlFor = `genre-${genre}`;
-        genreLabel.textContent = genre;
-        genreLabel.style.marginRight = "1rem";
-        genreLabel.style.marginBottom = "0.5rem";
-        genreLabel.style.display = "inline-block";
-        genreLabel.style.color = "#e2e8f0";
-        genreLabel.style.cursor = "pointer";
+        const span = document.createElement("span");
+        span.textContent = genre;
         
-        filterDiv.appendChild(checkbox);
-        filterDiv.appendChild(genreLabel);
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(span);
+        container.appendChild(wrapper);
     });
     
-    searchHeader.appendChild(filterDiv);
+    // Ukryj kontener domyślnie
+    container.style.display = "none";
+}
+
+
+
+function getUniquePlatforms() {
+    const platformsSet = new Set();
+    allItems.forEach(item => {
+        if (Array.isArray(item.platforms)) {
+            item.platforms.forEach(platform => {
+                const platformName = typeof platform === 'object' ? platform.name : platform;
+                platformsSet.add(platformName);
+            });
+        }
+    });
+    return Array.from(platformsSet).sort();
+}
+
+function createPlatformFilters() {
+    const container = document.getElementById("platformFilters");
+    if (!container) return;
+    
+    container.innerHTML = "";
+    const platforms = getUniquePlatforms();
+    
+    platforms.forEach(platform => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "filter-checkbox";
+        
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = platform;
+        checkbox.className = "platform-checkbox";
+        checkbox.addEventListener("change", performAdvancedSearch);
+        
+        const span = document.createElement("span");
+        span.textContent = platform;
+        
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(span);
+        container.appendChild(wrapper);
+    });
+    
+    // Ukryj kontener domyślnie
+    container.style.display = "none";
+}
+
+function styleSearchFilters() {
+    // Obsługa interaktywności dla nagłówków filtrów
+    const filterSections = document.querySelectorAll(".filter-section");
+    filterSections.forEach(section => {
+        const h3 = section.querySelector("h3");
+        if (h3) {
+            // Dodaj strzałkę jeśli jeszcze jej nie ma
+            if (!h3.querySelector("span")) {
+                const arrow = document.createElement("span");
+                arrow.textContent = "▼";
+                h3.appendChild(arrow);
+            }
+            
+            const arrow = h3.querySelector("span");
+            
+            // Event listener na kliknięcie
+            h3.addEventListener("click", function() {
+                const section = this.closest(".filter-section");
+                const options = section.querySelector(".filter-options");
+                const isHidden = options.style.display === "none";
+                
+                options.style.display = isHidden ? "flex" : "none";
+                
+                // Rotuj strzałkę
+                if (arrow) {
+                    arrow.style.transform = isHidden ? "rotate(0deg)" : "rotate(-180deg)";
+                }
+            });
+        }
+    });
 }
 
 function performAdvancedSearch() {
     const q = overlaySearchInput.value.toLowerCase();
+    
+    // Pobierz zaznaczone filtry
     const selectedGenres = Array.from(
-        document.querySelectorAll("#genreFilters input[type='checkbox']:checked")
+        document.querySelectorAll(".genre-checkbox:checked")
+    ).map(cb => cb.value);
+    
+    const selectedPlatforms = Array.from(
+        document.querySelectorAll(".platform-checkbox:checked")
     ).map(cb => cb.value);
     
     const filtered = allItems.filter(item => {
-        // Match title
-        const titleMatch = item.title.toLowerCase().includes(q);
-        // Match genres
+        // Match title, director, and cast with search text
+        const titleMatch = !q || item.title.toLowerCase().includes(q);
+        const directorMatch = !q || (item.director && item.director.toLowerCase().includes(q));
+        const actorMatch = !q || (Array.isArray(item.cast) && item.cast.some(actor => 
+            actor.toLowerCase().includes(q)
+        ));
+        const textMatch = titleMatch || directorMatch || actorMatch;
+        
+        // Match genres (checkbox filter)
         const genreMatch = selectedGenres.length === 0 || 
             (Array.isArray(item.genres) && selectedGenres.some(g => item.genres.includes(g)));
-        return titleMatch && genreMatch;
+        
+        // Match platform (checkbox filter)
+        const platformMatch = selectedPlatforms.length === 0 || 
+            (Array.isArray(item.platforms) && item.platforms.some(platform => {
+                const platformName = typeof platform === 'object' ? platform.name : platform;
+                return selectedPlatforms.includes(platformName);
+            }));
+        
+        return textMatch && genreMatch && platformMatch;
     });
     
     renderSearchResults(filtered);
@@ -518,10 +605,15 @@ document.getElementById("openSearch").onclick = () => {
     searchOverlay.style.display = "flex";
     overlaySearchInput.value = "";
     
-    // Initialize genre filters if not already done
-    if (!document.getElementById("genreFilters")) {
+    // Initialize filters if not already done
+    const genreFilters = document.getElementById("genreFilters");
+    if (genreFilters && !genreFilters.hasChildNodes()) {
         createGenreFilters();
+        createPlatformFilters();
     }
+    
+    // Styluj filtry wyszukiwania
+    styleSearchFilters();
     
     renderSearchResults(allItems);
     overlaySearchInput.focus();
