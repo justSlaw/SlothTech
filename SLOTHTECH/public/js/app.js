@@ -7,6 +7,34 @@
 // const series = [
 //     { id:101, title:"Breaking Bad", originalTitle:"Breaking Bad", year:2008, duration:"62 odcinki", genres:["Crime","Drama","Thriller"], director:"Vince Gilligan", cast:["Bryan Cranston","Aaron Paul","Anna Gunn"], type:"series", rating:9.5, platforms:[{name:"Netflix", type:"Subskrypcja"}], description:"Nauczyciel chemii zostaje producentem narkotyków." }
 // ];
+
+// ===== ULUBIONE - FUNKCJE POMOCNICZE =====
+function getFavToken() {
+    let token = localStorage.getItem("fav_token");
+    if (!token) {
+        token = crypto.randomUUID();
+        localStorage.setItem("fav_token", token);
+    }
+    return token;
+}
+
+function toggleFavorite(itemId) {
+    fetch("/api/favorites.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            token: favToken,
+            item_id: itemId
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        console.log("FAVORITE:", data.status);
+    });
+}
+
+const favToken = getFavToken();
+
 // ===== ELEMENTY DOM =====
 const moviesEl = document.getElementById("movies");
 const seriesEl = document.getElementById("series");
@@ -17,11 +45,18 @@ const submitReview = document.getElementById("submitReview");
 const searchResults = document.getElementById("searchResults");
 const overlaySearchInput = document.getElementById("overlaySearchInput");
 const searchOverlay = document.getElementById("searchOverlay");
+// ULUBIONE - dodatkowe elementy DOM
+const favBtnFull = document.getElementById("favBtnFull");
+const openFavorites = document.getElementById("openFavorites");
+const favoritesSection = document.getElementById("favoritesSection");
+const favoritesEl = document.getElementById("favorites");
+const homeLinks = document.querySelectorAll(".nav-links a");
 
 let movies = [];
 let series = [];
 let allItems = [];
 let userReviewRating = 0;
+let currentFavorites = []; // ULUBIONE - lista ID ulubionych filmów
 
 // ===== POBIERANIE FILMÓW I SERIALI =====
 fetch("/api/items.php")
@@ -30,8 +65,64 @@ fetch("/api/items.php")
         movies = items.filter(i => i.type === "movie");
         series = items.filter(i => i.type === "series");
         allItems = items;
-        render(movies, moviesEl);
-        render(series, seriesEl);
+        
+        // ULUBIONE - pobierz listę ulubionych przed renderowaniem
+        fetch(`/api/favorites.php?token=${favToken}`)
+            .then(res => res.json())
+            .then(itemIds => {
+                currentFavorites = itemIds.map(id => parseInt(id));
+                render(movies, moviesEl);
+                render(series, seriesEl);
+                
+                // ULUBIONE - sprawdź link udostępniony
+                checkSharedFavorites();
+            });
+        
+        // ULUBIONE - listener na przycisk "Moje ulubione"
+        if (openFavorites) {
+            openFavorites.addEventListener("click", () => {
+                if (allItems.length === 0) {
+                    console.log("Czekamy na załadowanie filmów i seriali...");
+                    return;
+                }
+
+                fetch(`/api/favorites.php?token=${favToken}`)
+                    .then(res => res.json())
+                    .then(itemIds => {
+                        const favIds = itemIds.map(id => parseInt(id));
+                        const favItems = allItems.filter(i => favIds.includes(i.id));
+
+                        // Ukrywamy wszystkie sekcje poza ulubionymi
+                        document.querySelector(".hero").style.display = "none";
+                        document.getElementById("movies").parentElement.style.display = "none";
+                        document.getElementById("series").parentElement.style.display = "none";
+
+                        // Pokazujemy ulubione
+                        favoritesSection.style.display = "block";
+
+                        // Renderujemy ulubione
+                        if (favItems.length > 0) {
+                            render(favItems, favoritesEl);
+                        } else {
+                            favoritesEl.innerHTML = "<p>Nie masz jeszcze ulubionych filmów ani seriali.</p>";
+                        }
+                        
+                        // Dodaj przycisk udostępniania
+                        addShareButton();
+                    });
+            });
+        }
+        
+        // ULUBIONE - listener na powrót do strony głównej
+        if (homeLinks[0]) {
+            homeLinks[0].addEventListener("click", (e) => {
+                e.preventDefault();
+                document.querySelector(".hero").style.display = "block";
+                document.getElementById("movies").parentElement.style.display = "block";
+                document.getElementById("series").parentElement.style.display = "block";
+                if (favoritesSection) favoritesSection.style.display = "none";
+            });
+        }
     });
 
 // ===== RENDEROWANIE KART =====
@@ -39,15 +130,78 @@ function render(items, container) {
     container.innerHTML = "";
     items.forEach(item => {
         const poster = `/public/img/${item.id}.jpg`;
-        container.innerHTML += `
-            <article class="card" data-id="${item.id}">
-                <img class="poster ${item.type}" src="${poster}" alt="${item.title}" onerror="this.src='/public/img/placeholder.svg';">
-                <div class="card-info">
-                    <h3>${item.title}</h3>
-                    <span class="rating">⭐ ${item.rating}</span>
-                </div>
-            </article>
+        const isFavorite = currentFavorites.includes(item.id);
+        const heartIcon = isFavorite ? "❤️" : "🤍";
+        
+        const card = document.createElement("article");
+        card.className = "card";
+        card.dataset.id = item.id;
+        card.style.position = "relative";
+        
+        card.innerHTML = `
+            <button class="fav-btn-card ${isFavorite ? 'active' : ''}" data-id="${item.id}" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                border: none;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                cursor: pointer;
+                z-index: 10;
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                ${heartIcon}
+            </button>
+            <img class="poster ${item.type}" src="${poster}" alt="${item.title}" onerror="this.src='/public/img/placeholder.svg';">
+            <div class="card-info">
+                <h3>${item.title}</h3>
+                <span class="rating">⭐ ${item.rating}</span>
+            </div>
         `;
+        
+        container.appendChild(card);
+    });
+    
+    // ULUBIONE - dodaj listenery do serduszek
+    container.querySelectorAll('.fav-btn-card').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemId = parseInt(btn.dataset.id);
+            toggleFavorite(itemId);
+            
+            const index = currentFavorites.indexOf(itemId);
+            if (index > -1) {
+                currentFavorites.splice(index, 1);
+                btn.textContent = "🤍";
+                btn.classList.remove('active');
+            } else {
+                currentFavorites.push(itemId);
+                btn.textContent = "❤️";
+                btn.classList.add('active');
+            }
+            
+            updateAllHearts();
+            
+            if (favoritesSection && favoritesSection.style.display === "block") {
+                setTimeout(() => {
+                    fetch(`/api/favorites.php?token=${favToken}`)
+                        .then(res => res.json())
+                        .then(itemIds => {
+                            const favIds = itemIds.map(id => parseInt(id));
+                            const favItems = allItems.filter(i => favIds.includes(i.id));
+                            
+                            if (favItems.length > 0) {
+                                render(favItems, favoritesEl);
+                            } else {
+                                favoritesEl.innerHTML = "<p>Nie masz jeszcze ulubionych filmów ani seriali.</p>";
+                            }
+                        });
+                }, 100);
+            }
+        });
     });
 }
 
@@ -232,6 +386,21 @@ document.addEventListener("click", async (e) => {
     
     fullOverlay.style.display = "flex";
     fullOverlay.dataset.itemId = id;
+    
+    // ULUBIONE - sprawdź czy film jest w ulubionych
+    if (favBtnFull) {
+        fetch(`/api/favorites.php?token=${favToken}`)
+        .then(res => res.json())
+        .then(favIds => {
+            if (favIds.includes(item.id)) {
+                favBtnFull.classList.add("active");
+                favBtnFull.textContent = "Usuń z ulubionych";
+            } else {
+                favBtnFull.classList.remove("active");
+                favBtnFull.textContent = "Dodaj do ulubionych";
+            }
+        });
+    }
     
     // Załaduj statystyki
     loadStats(id);
@@ -435,15 +604,61 @@ function renderSearchResults(items) {
     searchResults.innerHTML = "";
     items.forEach(item => {
         const posterSrc = `/public/img/${item.id}.jpg`;
-        searchResults.innerHTML += `
-            <article class="card" data-id="${item.id}">
-                <img class="poster ${item.type}" src="${posterSrc}" alt="${item.title}" onerror="this.onerror=null; this.src='/public/img/placeholder.svg';" />
-                <div class="card-info">
-                    <h3>${item.title}</h3>
-                    <span class="rating">⭐ ${item.rating}</span>
-                </div>
-            </article>
+        const isFavorite = currentFavorites.includes(item.id);
+        const heartIcon = isFavorite ? "❤️" : "🤍";
+        
+        const card = document.createElement("article");
+        card.className = "card";
+        card.dataset.id = item.id;
+        card.style.position = "relative";
+        
+        card.innerHTML = `
+            <button class="fav-btn-card ${isFavorite ? 'active' : ''}" data-id="${item.id}" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                border: none;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                cursor: pointer;
+                z-index: 10;
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                ${heartIcon}
+            </button>
+            <img class="poster ${item.type}" src="${posterSrc}" alt="${item.title}" onerror="this.onerror=null; this.src='/public/img/placeholder.svg';" />
+            <div class="card-info">
+                <h3>${item.title}</h3>
+                <span class="rating">⭐ ${item.rating}</span>
+            </div>
         `;
+        
+        searchResults.appendChild(card);
+    });
+    
+    // ULUBIONE - dodaj listenery do serduszek w wynikach wyszukiwania
+    searchResults.querySelectorAll('.fav-btn-card').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemId = parseInt(btn.dataset.id);
+            toggleFavorite(itemId);
+            
+            const index = currentFavorites.indexOf(itemId);
+            if (index > -1) {
+                currentFavorites.splice(index, 1);
+                btn.textContent = "🤍";
+                btn.classList.remove('active');
+            } else {
+                currentFavorites.push(itemId);
+                btn.textContent = "❤️";
+                btn.classList.add('active');
+            }
+            
+            updateAllHearts();
+        });
     });
 }
 
@@ -517,7 +732,8 @@ function createPlatformFilters() {
         checkbox.type = "checkbox";
         checkbox.value = platform;
         checkbox.className = "platform-checkbox";
-        checkbox.addEventListener("change", performAdvancedSearch);
+        checkbox.
+addEventListener("change", performAdvancedSearch);
         
         const span = document.createElement("span");
         span.textContent = platform;
@@ -630,6 +846,128 @@ buttons.forEach(button => {
         document.body.className = button.dataset.theme;
     });
 });
+
+// ===== ULUBIONE - FUNKCJE DODATKOWE =====
+
+// ULUBIONE - Funkcja do aktualizacji wszystkich serduszek
+function updateAllHearts() {
+    document.querySelectorAll('.fav-btn-card').forEach(btn => {
+        const itemId = parseInt(btn.dataset.id);
+        const isFavorite = currentFavorites.includes(itemId);
+        
+        if (isFavorite) {
+            btn.textContent = "❤️";
+            btn.classList.add('active');
+        } else {
+            btn.textContent = "🤍";
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// ===== ULUBIONE - LISTENER NA PRZYCISK W FULL OVERLAY =====
+if (favBtnFull) {
+    favBtnFull.addEventListener("click", () => {
+        const itemId = parseInt(fullOverlay.dataset.itemId);
+        if (!itemId) return;
+
+        toggleFavorite(itemId);
+
+        if (favBtnFull.classList.contains("active")) {
+            favBtnFull.classList.remove("active");
+            favBtnFull.textContent = "Dodaj do ulubionych";
+            const index = currentFavorites.indexOf(itemId);
+            if (index > -1) {
+                currentFavorites.splice(index, 1);
+            }
+        } else {
+            favBtnFull.classList.add("active");
+            favBtnFull.textContent = "Usuń z ulubionych";
+            if (!currentFavorites.includes(itemId)) {
+                currentFavorites.push(itemId);
+            }
+        }
+        
+        updateAllHearts();
+    });
+}
+
+// ===== ULUBIONE - FUNKCJE UDOSTĘPNIANIA =====
+function checkSharedFavorites() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedToken = urlParams.get('favorites');
+    
+    if (sharedToken && sharedToken !== favToken && allItems.length > 0) {
+        document.querySelector(".hero").style.display = "none";
+        document.getElementById("movies").parentElement.style.display = "none";
+        document.getElementById("series").parentElement.style.display = "none";
+        
+        fetch(`/api/favorites.php?token=${sharedToken}`)
+            .then(res => res.json())
+            .then(itemIds => {
+                const favIds = itemIds.map(id => parseInt(id));
+                const favItems = allItems.filter(i => favIds.includes(i.id));
+                
+                if (favoritesSection) {
+                    favoritesSection.style.display = "block";
+                    
+                    const header = favoritesSection.querySelector("h2");
+                    header.textContent = "🎬 Ulubione użytkownika";
+                    header.style.color = "#3b82f6";
+                    
+                    let infoP = favoritesSection.querySelector(".shared-info");
+                    if (!infoP) {
+                        infoP = document.createElement("p");
+                        infoP.className = "shared-info";
+                        infoP.style.cssText = "color: #94a3b8; margin-bottom: 2rem; text-align: center;";
+                        infoP.textContent = "Ktoś podzielił się z Tobą swoją listą ulubionych!";
+                        favoritesSection.insertBefore(infoP, favoritesEl);
+                    }
+                    
+                    if (favItems.length > 0) {
+                        render(favItems, favoritesEl);
+                    } else {
+                        favoritesEl.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:2rem;'>Ten użytkownik nie ma jeszcze żadnych ulubionych.</p>";
+                    }
+                    
+                    document.querySelectorAll(".nav-links a").forEach(link => link.classList.remove("active"));
+                    if (openFavorites) openFavorites.classList.add("active");
+                }
+            });
+    }
+}
+
+function addShareButton() {
+    if (document.getElementById("shareFavoritesBtn")) return;
+    
+    const shareBtn = document.createElement("button");
+    shareBtn.id = "shareFavoritesBtn";
+    shareBtn.textContent = "🔗 Udostępnij moje ulubione";
+    shareBtn.style.cssText = `
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 2rem;
+    `;
+    
+    shareBtn.onclick = () => {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?favorites=${favToken}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            alert('✅ Link skopiowany!\n\nWyślij go znajomym, aby zobaczyli Twoje ulubione.');
+        }).catch(() => {
+            prompt('Skopiuj ten link:', shareUrl);
+        });
+    };
+    
+    if (favoritesSection) {
+        favoritesSection.insertBefore(shareBtn, favoritesEl);
+    }
+}
 
 // ===== INICJALIZACJA =====
 document.addEventListener('DOMContentLoaded', () => {

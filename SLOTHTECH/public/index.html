@@ -7,16 +7,14 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <body class="theme-dark">
-
 <header class="navbar">
     <div class="logo">PLUSFLIX</div>
     <nav class="nav-links">
         <a href="#" class="active">🏠 Strona główna</a>
         <a href="#" id="openSearch">🔍 Wyszukiwarka</a>
+        <a href="#" id="openFavorites">💖 Moje ulubione</a>
     </nav>
-
     <div class="theme-switcher">
         <button data-theme="theme-dark" title="Tryb ciemny">🌙</button>
         <button data-theme="theme-light" title="Tryb jasny">☀️</button>
@@ -24,23 +22,23 @@
         <button data-theme="theme-colorblind" title="Daltoniści">👁️</button>
     </div>
 </header>
-
 <section class="hero">
     <span class="badge">Polecane</span>
     <h1>Incepcja</h1>
     <p>Dom Cobb jest najlepszym ze złodziei specjalizujących się w wykradaniu sekretów ze snów.</p>
 </section>
-
 <section class="section">
     <h2>Popularne filmy</h2>
     <div class="cards" id="movies"></div>
 </section>
-
 <section class="section">
     <h2>Popularne seriale</h2>
     <div class="cards" id="series"></div>
 </section>
-
+<section class="section" id="favoritesSection" style="display:none;">
+    <h2>Moje ulubione</h2>
+    <div class="cards" id="favorites"></div>
+</section>
 <!-- FULLSCREEN OVERLAY MODAL -->
 <div class="full-overlay" id="fullOverlay">
     <div class="full-header">
@@ -50,7 +48,6 @@
         </div>
         <button id="closeFullOverlay">✕</button>
     </div>
-
     <div class="full-meta">
         <span>Ocena:</span>
         <div id="fullRatingStars" class="stars"></div>
@@ -59,17 +56,13 @@
         <span id="fullDuration"></span>
         <div id="fullGenres"></div>
     </div>
-
     <p id="fullDescription"></p>
-
     <div class="full-director"><strong>Reżyser:</strong> <span id="fullDirector"></span></div>
     <div class="full-cast"><strong>Obsada:</strong> <span id="fullCast"></span></div>
-
     <div class="full-platforms">
         <h4>Gdzie obejrzeć</h4>
         <div id="fullPlatforms"></div>
     </div>
-
     <div class="full-actions">
         <button id="favBtnFull">❤ Dodaj do ulubionych</button>
         <button id="shareBtnFull">📤 Udostępnij</button>
@@ -95,7 +88,6 @@
         <div id="reviewsList"></div>
     </div>
 </div>
-
 <!-- SEARCH OVERLAY -->
 <div class="search-overlay" id="searchOverlay">
     <div class="search-main">
@@ -119,7 +111,6 @@
         <div class="search-results" id="searchResults"></div>
     </div>
 </div>
-
 <script src="js/app.js"></script>
 </body>
 </html>
