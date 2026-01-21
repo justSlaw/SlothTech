@@ -19,7 +19,7 @@ function getFavToken() {
 }
 
 function toggleFavorite(itemId) {
-    fetch("/api/favorites.php", {
+    fetch("/api/favorites", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({
@@ -59,7 +59,7 @@ let userReviewRating = 0;
 let currentFavorites = []; // ULUBIONE - lista ID ulubionych filmów
 
 // ===== POBIERANIE FILMÓW I SERIALI =====
-fetch("/api/items.php")
+fetch("/api/items")
     .then(res => res.json())
     .then(items => {
         movies = items.filter(i => i.type === "movie");
@@ -67,7 +67,7 @@ fetch("/api/items.php")
         allItems = items;
         
         // ULUBIONE - pobierz listę ulubionych przed renderowaniem
-        fetch(`/api/favorites.php?token=${favToken}`)
+        fetch(`/api/favorites?token=${favToken}`)
             .then(res => res.json())
             .then(itemIds => {
                 currentFavorites = itemIds.map(id => parseInt(id));
@@ -86,7 +86,7 @@ fetch("/api/items.php")
                     return;
                 }
 
-                fetch(`/api/favorites.php?token=${favToken}`)
+                fetch(`/api/favorites?token=${favToken}`)
                     .then(res => res.json())
                     .then(itemIds => {
                         const favIds = itemIds.map(id => parseInt(id));
@@ -187,7 +187,7 @@ function render(items, container) {
             
             if (favoritesSection && favoritesSection.style.display === "block") {
                 setTimeout(() => {
-                    fetch(`/api/favorites.php?token=${favToken}`)
+                    fetch(`/api/favorites?token=${favToken}`)
                         .then(res => res.json())
                         .then(itemIds => {
                             const favIds = itemIds.map(id => parseInt(id));
@@ -246,7 +246,7 @@ function renderStars(container, rating = 0, interactive = false) {
 
 // ===== FUNKCJA DO ŁADOWANIA STATYSTYK =====
 function loadStats(itemId) {
-    fetch(`/api/reviews.php?stats=1&item_id=${itemId}`)
+    fetch(`/api/reviews?stats=1&item_id=${itemId}`)
         .then(res => res.json())
         .then(data => {
             document.getElementById('averageRating').textContent = data.average || '0.0';
@@ -278,7 +278,7 @@ function addLikeDislikeListeners() {
             console.log("Kliknięto:", type, "reviewId:", reviewId);
             
             try {
-                const response = await fetch(`/api/reviews.php?action=like`, {
+                const response = await fetch(`/api/reviews?action=like`, {
                     method: "POST",
                     headers: {"Content-Type":"application/json"},
                     body: JSON.stringify({review_id: reviewId, type: type})
@@ -305,7 +305,7 @@ function addLikeDislikeListeners() {
                     // Pobierz aktualne dane z serwera
                     const itemId = fullOverlay.dataset.itemId;
                     if (itemId) {
-                        const statsResponse = await fetch(`/api/reviews.php?stats=1&item_id=${itemId}`);
+                        const statsResponse = await fetch(`/api/reviews?stats=1&item_id=${itemId}`);
                         const statsData = await statsResponse.json();
                         
                         if (statsData.likesData) {
@@ -351,10 +351,10 @@ function addLikeDislikeListeners() {
 // ===== FUNKCJA DO ŁADOWANIA RECENZJI Z LIKE/DISLIKE =====
 async function loadReviewsWithLikes(itemId) {
     try {
-        const reviewsResponse = await fetch(`/api/reviews.php?item_id=${itemId}`);
+        const reviewsResponse = await fetch(`/api/reviews?item_id=${itemId}`);
         const reviews = await reviewsResponse.json();
         
-        const statsResponse = await fetch(`/api/reviews.php?stats=1&item_id=${itemId}`);
+        const statsResponse = await fetch(`/api/reviews?stats=1&item_id=${itemId}`);
         const statsData = await statsResponse.json();
         
         const likesMap = {};
@@ -389,7 +389,7 @@ document.addEventListener("click", async (e) => {
     
     // ULUBIONE - sprawdź czy film jest w ulubionych
     if (favBtnFull) {
-        fetch(`/api/favorites.php?token=${favToken}`)
+        fetch(`/api/favorites?token=${favToken}`)
         .then(res => res.json())
         .then(favIds => {
             if (favIds.includes(item.id)) {
@@ -519,7 +519,7 @@ submitReview.addEventListener("click", async () => {
     }
     
     try {
-        const response = await fetch("/api/reviews.php", {
+        const response = await fetch("/api/reviews", {
             method: "POST",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({item_id: itemId, rating: userReviewRating, text})
@@ -902,7 +902,7 @@ function checkSharedFavorites() {
         document.getElementById("movies").parentElement.style.display = "none";
         document.getElementById("series").parentElement.style.display = "none";
         
-        fetch(`/api/favorites.php?token=${sharedToken}`)
+        fetch(`/api/favorites?token=${sharedToken}`)
             .then(res => res.json())
             .then(itemIds => {
                 const favIds = itemIds.map(id => parseInt(id));
