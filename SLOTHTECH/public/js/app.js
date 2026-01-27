@@ -129,7 +129,7 @@ fetch("/api/items")
 function render(items, container) {
     container.innerHTML = "";
     items.forEach(item => {
-        const poster = `/public/img/${item.id}.jpg`;
+        const poster = item.poster ? item.poster : `/public/img/${item.id}.jpg`;
         const isFavorite = currentFavorites.includes(item.id);
         const heartIcon = isFavorite ? "❤️" : "🤍";
         
@@ -603,7 +603,7 @@ window.addEventListener("click", e => {
 function renderSearchResults(items) {
     searchResults.innerHTML = "";
     items.forEach(item => {
-        const posterSrc = `/public/img/${item.id}.jpg`;
+        const poster = item.poster ? item.poster : `/public/img/${item.id}.jpg`;
         const isFavorite = currentFavorites.includes(item.id);
         const heartIcon = isFavorite ? "❤️" : "🤍";
         

@@ -108,14 +108,15 @@ if ($method === 'GET') {
     $director = trim($data['director'] ?? '');
     $platforms = json_encode(normalizePlatforms($data['platforms'] ?? []), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $duration = trim($data['duration'] ?? '');
+    $poster = trim($data['poster'] ?? '');
     if (!$type || !$title || !$year) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Brak wymaganych danych']);
         exit;
     }
 
-    $stmt = $db->prepare('INSERT INTO items (type, title, year, rating, genres, cast, platforms, director, duration) 
-                        VALUES (:type, :title, :year, :rating, :genres, :cast, :platforms, :director, :duration)');
+    $stmt = $db->prepare('INSERT INTO items (type, title, year, rating, genres, cast, platforms, director, duration, poster) 
+                        VALUES (:type, :title, :year, :rating, :genres, :cast, :platforms, :director, :duration, :poster)');
     $stmt->execute([
         ':type' => $type,
         ':title' => $title,
@@ -125,7 +126,8 @@ if ($method === 'GET') {
         ':cast' => $cast,
         ':platforms' => $platforms,
         ':director' => $director,
-        ':duration' => $duration
+        ':duration' => $duration,
+        ':poster' => $poster
     ]);
 
     echo json_encode(['success' => true, 'id' => $db->lastInsertId()]);

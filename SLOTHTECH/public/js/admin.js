@@ -386,7 +386,7 @@ if (addItemForm) {
         const cast = document.getElementById('cast').value.split(',').map(c => c.trim()).filter(c => c);
         const platformsRaw = document.getElementById('platforms').value.split(',').map(p => p.trim()).filter(p => p);
         const movieDuration = addItemForm.querySelector('#movieDuration').value.trim();
-
+        const poster = document.getElementById('moviePoster').value.trim();
 
 
         const platforms = platformsRaw.map(p => {
@@ -395,7 +395,7 @@ if (addItemForm) {
         });
 
         const payload = { 
-            type, title, year, rating, genres, cast, platforms, director, duration: movieDuration 
+            type, title, year, rating, genres, cast, platforms, director, duration: movieDuration, poster
         };
         fetch('/api/items', {
             method: 'POST',
@@ -434,13 +434,13 @@ if (addSeriesForm) {
         const cast = addSeriesForm.querySelector('#seriescast').value.split(',').map(c => c.trim()).filter(c => c);
         const platformsRaw = addSeriesForm.querySelector('#seriesplatforms').value.split(',').map(p => p.trim()).filter(p => p);
         const duration = addSeriesForm.querySelector('#seriesDuration').value.trim();
-
+        const poster = document.getElementById('seriesPoster').value.trim();
 
         const platforms = platformsRaw.map(p => {
             const [name, type = ''] = p.split('|').map(x => x.trim());
             return { name, type };
         });
-        const payload = { type, title, year, rating, genres, cast, platforms, director, duration };
+        const payload = { type, title, year, rating, genres, cast, platforms, director, duration, poster };
 
         fetch('/api/items', {
             method: 'POST',
