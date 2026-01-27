@@ -187,9 +187,35 @@ function loadGenres() {
             const container = document.getElementById('genreList');
             container.innerHTML = '';
             genres.forEach(g => {
-                const div = document.createElement('div');
-                div.textContent = g.genre;
-                container.appendChild(div);
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.padding = '8px 0';
+
+                const label = document.createElement('span');
+                label.textContent = g.genre;
+
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '8px';
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = '✏️';
+                editBtn.title = 'Edytuj';
+                editBtn.addEventListener('click', () => editGenre(g.id, g.genre));
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '🗑️';
+                delBtn.title = 'Usuń';
+                delBtn.addEventListener('click', () => deleteGenre(g.id, g.genre));
+
+                actions.appendChild(editBtn);
+                actions.appendChild(delBtn);
+
+                row.appendChild(label);
+                row.appendChild(actions);
+                container.appendChild(row);
             });
         });
 }
@@ -201,9 +227,118 @@ function loadPlatforms() {
             const container = document.getElementById('platformList');
             container.innerHTML = '';
             platforms.forEach(p => {
-                const div = document.createElement('div');
-                div.textContent = p.platform + (p.type ? ` (${p.type})` : '');
-                container.appendChild(div);
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.padding = '8px 0';
+
+                const label = document.createElement('span');
+                label.textContent = p.platform + (p.type ? ` (${p.type})` : '');
+
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '8px';
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = '✏️';
+                editBtn.title = 'Edytuj';
+                editBtn.addEventListener('click', () => editPlatform(p.id, p.platform, p.type || ''));
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '🗑️';
+                delBtn.title = 'Usuń';
+                delBtn.addEventListener('click', () => deletePlatform(p.id, p.platform, p.type || ''));
+
+                actions.appendChild(editBtn);
+                actions.appendChild(delBtn);
+
+                row.appendChild(label);
+                row.appendChild(actions);
+                container.appendChild(row);
             });
+        });
+}
+
+function editGenre(id, currentName) {
+    const next = prompt('Nowa nazwa gatunku:', currentName);
+    if (next === null) return;
+    const genre = next.trim();
+    if (!genre) return alert('Podaj nazwę gatunku');
+
+    fetch(`/genres?id=${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genre })
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadGenres();
+                alert('Zapisano zmiany');
+            } else {
+                alert('Błąd: ' + (data.error || ''));
+            }
+        });
+}
+
+function deleteGenre(id, name) {
+    if (!confirm(`Usunąć gatunek "${name}"?\nZostanie też usunięty z filmów/seriali.`)) return;
+
+    fetch(`/genres?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadGenres();
+                alert('Usunięto gatunek');
+            } else {
+                alert('Błąd: ' + (data.error || ''));
+            }
+        });
+}
+
+function editPlatform(id, currentName, currentType) {
+    const nextNameRaw = prompt('Nowa nazwa platformy:', currentName);
+    if (nextNameRaw === null) return;
+    const platform = nextNameRaw.trim();
+    if (!platform) return alert('Podaj nazwę platformy');
+
+    const nextTypeRaw = prompt('Nowy typ abonamentu (może być pusty):', currentType || '');
+    if (nextTypeRaw === null) return;
+    const type = nextTypeRaw.trim();
+
+    fetch(`/platforms?id=${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform, type })
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadPlatforms();
+                alert('Zapisano zmiany');
+            } else {
+                alert('Błąd: ' + (data.error || ''));
+            }
+        });
+}
+
+function deletePlatform(id, name, type) {
+    const label = type ? `${name} (${type})` : name;
+    if (!confirm(`Usunąć platformę "${label}"?\nZostanie też usunięta z filmów/seriali.`)) return;
+
+    fetch(`/platforms?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadPlatforms();
+                alert('Usunięto platformę');
+            } else {
+                alert('Błąd: ' + (data.error || ''));
+            }
         });
 }

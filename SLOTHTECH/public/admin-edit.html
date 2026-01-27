@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>PLUSFLIX - Edycja</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h1>👑 PLUSFLIX</h1>
+            <p class="admin-subtitle">Panel Administratora</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="admin.html" class="nav-item">
+                <span>📊</span> Dashboard
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="admin.html" class="btn-back">
+                ← Powrót do panelu
+            </a>
+            <button class="btn-logout" id="logoutBtn">
+                🚪 Wyloguj
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <h2>Edycja</h2>
+                <p class="header-subtitle" id="itemTitle">Ładowanie…</p>
+                <p class="edit-meta" id="itemMeta"></p>
+            </div>
+        </header>
+
+        <section class="edit-card">
+            <h3>Gatunki</h3>
+            <input class="edit-search" type="text" id="genreSearch" placeholder="Szukaj gatunku…">
+            <div class="edit-grid" id="genresContainer"></div>
+        </section>
+
+        <section class="edit-card">
+            <h3>Platformy</h3>
+            <input class="edit-search" type="text" id="platformSearch" placeholder="Szukaj platformy…">
+            <div class="edit-grid" id="platformsContainer"></div>
+        </section>
+
+        <div class="edit-actions">
+            <button class="btn-primary" id="saveBtn">Zapisz zmiany</button>
+            <button class="btn-secondary" id="cancelBtn">Anuluj</button>
+        </div>
+
+        <p class="edit-meta" id="statusMsg" style="margin-top: 0.75rem;"></p>
+    </main>
+</div>
+
+<script src="js/admin-edit.js"></script>
+</body>
+</html>
