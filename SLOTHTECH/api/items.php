@@ -96,7 +96,42 @@ if ($method === 'GET') {
     }
     echo json_encode($items, JSON_UNESCAPED_UNICODE);
     exit;
+}if ($method === 'POST') {
+    $data = readJsonBody();
+
+    $type = $data['type'] ?? '';
+    $title = trim($data['title'] ?? '');
+    $year = (int)($data['year'] ?? 0);
+    $rating = floatval($data['rating'] ?? 0);
+    $genres = json_encode(normalizeGenres($data['genres'] ?? []), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $cast = json_encode($data['cast'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $director = trim($data['director'] ?? '');
+    $platforms = json_encode(normalizePlatforms($data['platforms'] ?? []), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $duration = trim($data['duration'] ?? '');
+    if (!$type || !$title || !$year) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Brak wymaganych danych']);
+        exit;
+    }
+
+    $stmt = $db->prepare('INSERT INTO items (type, title, year, rating, genres, cast, platforms, director, duration) 
+                        VALUES (:type, :title, :year, :rating, :genres, :cast, :platforms, :director, :duration)');
+    $stmt->execute([
+        ':type' => $type,
+        ':title' => $title,
+        ':year' => $year,
+        ':rating' => $rating,
+        ':genres' => $genres,
+        ':cast' => $cast,
+        ':platforms' => $platforms,
+        ':director' => $director,
+        ':duration' => $duration
+    ]);
+
+    echo json_encode(['success' => true, 'id' => $db->lastInsertId()]);
+    exit;
 }
+
 
 if ($method === 'PUT' || $method === 'PATCH') {
     $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

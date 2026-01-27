@@ -15,7 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event Listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.querySelector('.modal-close').addEventListener('click', closeModal);
+    // document.querySelector('.modal-close').addEventListener('click', closeModal);
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+
+
     
     // Szybkie akcje
     document.getElementById('addMovieBtn').addEventListener('click', () => {
@@ -131,17 +136,40 @@ function logout() {
     window.location.href = 'admin-login.html';
 }
 
-function showAddForm(type) {
-    const modal = document.getElementById('addMovieModal');
-    modal.style.display = 'flex';
+// function showAddForm(type) {
+//     const modal = document.getElementById('addMovieModal');
+//     modal.style.display = 'flex';
     
-    // Ustaw domyślny typ
-    document.getElementById('addType').value = type;
+//     // Ustaw domyślny typ
+//     document.getElementById('addType').value = type;
+// }
+function showAddForm(type) {
+    let modal;
+    if (type === 'movie') {
+        modal = document.getElementById('addMovieModal');
+    } else if (type === 'series') {
+        modal = document.getElementById('addSeriesModal');
+    } else return;
+
+    modal.style.display = 'flex';
 }
 
+
+// function closeModal() {
+//     // Ukrywamy oba modale
+//     const modals = [document.getElementById('addMovieModal'), document.getElementById('addSeriesModal')];
+//     modals.forEach(modal => { if(modal) modal.style.display = 'none'; });
+// }
 function closeModal() {
-    document.getElementById('addMovieModal').style.display = 'none';
+    const modals = [document.getElementById('addMovieModal'), document.getElementById('addSeriesModal')];
+    modals.forEach(modal => { if(modal) modal.style.display = 'none'; });
 }
+
+
+
+// function closeModal() {
+//     document.getElementById('addMovieModal').style.display = 'none';
+// }
 
 function closeGenreModal() {
     document.getElementById('addGenreModal').style.display = 'none';
@@ -342,3 +370,96 @@ function deletePlatform(id, name, type) {
             }
         });
 }
+
+const addItemForm = document.getElementById('addItemForm');
+
+if (addItemForm) {
+    addItemForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const type = document.getElementById('addType').value;
+        const title = document.getElementById('title').value.trim();
+        const year = parseInt(document.getElementById('year').value);
+        const rating = parseFloat(document.getElementById('rating').value) || 0;
+        const genres = document.getElementById('genres').value.split(',').map(g => g.trim()).filter(g => g);
+        const director = document.getElementById('director').value.trim();
+        const cast = document.getElementById('cast').value.split(',').map(c => c.trim()).filter(c => c);
+        const platformsRaw = document.getElementById('platforms').value.split(',').map(p => p.trim()).filter(p => p);
+        const movieDuration = addItemForm.querySelector('#movieDuration').value.trim();
+
+
+
+        const platforms = platformsRaw.map(p => {
+            const [name, type = ''] = p.split('|').map(x => x.trim());
+            return { name, type };
+        });
+
+        const payload = { 
+            type, title, year, rating, genres, cast, platforms, director, duration: movieDuration 
+        };
+        fetch('/api/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Dodano nowy element!');
+                addItemForm.reset();
+                closeModal();
+                updateStats();
+                loadRecentContent();
+            } else {
+                alert('Błąd: ' + (data.error || 'Nieznany błąd'));
+            }
+        })
+        .catch(err => alert('Błąd sieci: ' + err));
+    });
+}
+const addSeriesForm = document.getElementById('addSeriesForm');
+
+if (addSeriesForm) {
+    addSeriesForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Pobieramy pola z formularza serialu
+        const type = 'series';
+        const title = addSeriesForm.querySelector('#seriestitle').value.trim();
+        const year = parseInt(addSeriesForm.querySelector('#seriesyear').value);
+        const rating = parseFloat(addSeriesForm.querySelector('#seriesrating').value) || 0;
+        const genres = addSeriesForm.querySelector('#seriesgenres').value.split(',').map(g => g.trim()).filter(g => g);
+        const director = addSeriesForm.querySelector('#seriesdirector').value.trim();
+        const cast = addSeriesForm.querySelector('#seriescast').value.split(',').map(c => c.trim()).filter(c => c);
+        const platformsRaw = addSeriesForm.querySelector('#seriesplatforms').value.split(',').map(p => p.trim()).filter(p => p);
+        const duration = addSeriesForm.querySelector('#seriesDuration').value.trim();
+
+
+        const platforms = platformsRaw.map(p => {
+            const [name, type = ''] = p.split('|').map(x => x.trim());
+            return { name, type };
+        });
+        const payload = { type, title, year, rating, genres, cast, platforms, director, duration };
+
+        fetch('/api/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Dodano nowy serial!');
+                addSeriesForm.reset();
+                closeModal();
+                updateStats();
+                loadRecentContent();
+            } else {
+                alert('Błąd: ' + (data.error || 'Nieznany błąd'));
+            }
+        })
+        .catch(err => alert('Błąd sieci: ' + err));
+    });
+}
+
