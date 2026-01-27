@@ -37,6 +37,18 @@ switch ($route) {
     case 'admin-login':
         require_once __DIR__ . '/admin-login.html';
         break;
+
+    case 'deleteItem':
+        require_once __DIR__ . '/../api/deleteItem.php';
+        break;
+
+    case 'genres':
+        require_once __DIR__ . '/../api/genres.php';
+        break;
+
+    case 'platforms':
+        require_once __DIR__ . '/../api/platforms.php';
+        break;
     
     default:
     

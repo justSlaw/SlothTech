@@ -148,6 +148,39 @@
     </div>
 </div>
 
+<div class="modal" id="addGenreModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Gatunki</h3>
+            <button class="modal-close" onclick="closeGenreModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="genreList"></div>
+            <hr>
+            <h4>Dodaj nowy gatunek</h4>
+            <input type="text" id="genreName" placeholder="Nazwa gatunku">
+            <button id="saveGenreBtn">Dodaj</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="addPlatformModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Platformy</h3>
+            <button class="modal-close" onclick="closePlatformModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="platformList"></div>
+            <hr>
+            <h4>Dodaj nową platformę</h4>
+            <input type="text" id="platformName" placeholder="Nazwa platformy">
+            <input type="text" id="platformType" placeholder="Typ abonamentu">
+            <button id="savePlatformBtn">Dodaj</button>
+        </div>
+    </div>
+</div>
+
 <script src="js/admin.js"></script>
 </body>
 </html>

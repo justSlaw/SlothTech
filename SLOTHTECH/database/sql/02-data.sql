@@ -344,3 +344,24 @@ INSERT OR IGNORE INTO items VALUES
 '[{"name":"Netflix","type":"Subskrypcja"},{"name":"Disney+","type":"Subskrypcja"},{"name":"Amazon Prime","type":"Subskrypcja"}]',
 'Kamery towarzyszą pracownikom oddziału firmy sprzedającej artykuły papierowe w czasie ich codziennych obowiązków..'
 );
+
+INSERT OR IGNORE INTO genres (genre) VALUES ('Sci-Fi');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Thriller');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Akcja');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Drama');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Adventure');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Comedy');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Crime');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Fantasy');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Horror');
+INSERT OR IGNORE INTO genres (genre) VALUES ('History');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Politics');
+INSERT OR IGNORE INTO genres (genre) VALUES ('Western');
+
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('Netflix', 'Subskrypcja');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('HBO Max', 'Subskrypcja');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('Apple TV', 'Subskrypcja');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('Apple TV', 'Buy/Rent');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('Amazon Prime', 'Subskrypcja');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('SkyShowtime', 'Subskrypcja');
+INSERT OR IGNORE INTO platforms (platform, type) VALUES ('Disney+', 'Subskrypcja');
