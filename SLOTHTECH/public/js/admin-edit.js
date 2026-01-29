@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const selectedGenres = collectCheckedValues('genresContainer', 'genre');
         const selectedPlatforms = collectCheckedPlatforms('platformsContainer');
+        const newDescription = document.getElementById('descriptionInput').value.trim();
 
         statusMsg.textContent = 'Zapisywanie…';
         saveBtn.disabled = true;
@@ -70,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 genres: selectedGenres,
-                platforms: selectedPlatforms
+                platforms: selectedPlatforms,
+		description: newDescription
             })
         })
             .then(r => r.json())
@@ -100,6 +102,11 @@ function renderHeader(item) {
     if (item.original_title) metaParts.push(item.original_title);
 
     document.getElementById('itemMeta').textContent = metaParts.join(' • ');
+
+    const descInput = document.getElementById('descriptionInput');
+    if (descInput && item.description) {
+        descInput.value = item.description;
+    }
 }
 
 function normalizeItemGenres(item) {

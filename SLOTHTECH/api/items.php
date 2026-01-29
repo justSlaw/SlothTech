@@ -157,6 +157,12 @@ if ($method === 'PUT' || $method === 'PATCH') {
     $fields = [];
     $params = [':id' => $id];
 
+    // DODAJ obsługę description
+    if (array_key_exists('description', $data)) {
+        $fields[] = 'description = :description';
+        $params[':description'] = trim($data['description']);
+    }
+
     if (array_key_exists('genres', $data)) {
         $genres = normalizeGenres($data['genres']);
         $fields[] = 'genres = :genres';

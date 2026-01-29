@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>PLUSFLIX - Zarządzanie Recenzjami</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h1>👑 PLUSFLIX</h1>
+            <p class="admin-subtitle">Panel Administratora</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="admin.html" class="nav-item">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="admin-reviews.html" class="nav-item active">
+                <span>⭐</span> Recenzje
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="admin.html" class="btn-back">← Powrót do panelu</a>
+            <button class="btn-logout" id="logoutBtn">🚪 Wyloguj</button>
+        </div>
+    </aside>
+    
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <h2>Zarządzanie Recenzjami</h2>
+                <p class="header-subtitle">Moderuj recenzje użytkowników</p>
+            </div>
+        </header>
+        
+        <section class="recent-content">
+            <h3>Wszystkie recenzje</h3>
+            <div id="reviewsList"></div>
+        </section>
+    </main>
+</div>
+
+<script>
+// Sprawdź logowanie
+if (!localStorage.getItem('adminLoggedIn')) {
+    window.location.href = 'admin-login.html';
+}
+
+// Wylogowanie
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('adminLoggedIn');
+    window.location.href = 'admin-login.html';
+});
+
+// Załaduj wszystkie recenzje
+fetch('/api/items')
+    .then(res => res.json())
+    .then(items => {
+        const container = document.getElementById('reviewsList');
+        container.innerHTML = '<p style="color: #94a3b8;">Ładowanie recenzji...</p>';
+        
+        // Pobierz recenzje dla każdego filmu/serialu
+        Promise.all(items.map(item => 
+            fetch(`/api/reviews?item_id=${item.id}`)
+                .then(r => r.json())
+                .then(reviews => ({ item, reviews }))
+        ))
+        .then(results => {
+            container.innerHTML = '';
+            
+            results.forEach(({ item, reviews }) => {
+                if (reviews.length === 0) return;
+                
+                const section = document.createElement('div');
+                section.style.cssText = 'background: #1e293b; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;';
+                
+                const header = document.createElement('h4');
+                header.textContent = `${item.title} (${item.year})`;
+                header.style.cssText = 'color: white; margin-bottom: 1rem; font-size: 1.2rem;';
+                section.appendChild(header);
+                
+                reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.style.cssText = 'background: #0f172a; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; border-left: 3px solid #3b82f6;';
+                    
+                    const stars = '⭐'.repeat(review.rating);
+                    
+                    reviewDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="color: gold; margin-bottom: 0.5rem;">${stars} (${review.rating}/10)</div>
+                                <div style="color: #e2e8f0; margin-bottom: 0.5rem;">${review.text || '(bez tekstu)'}</div>
+                                <div style="color: #94a3b8; font-size: 0.85rem;">${review.date}</div>
+                            </div>
+                            <button class="delete-review-btn" data-review-id="${review.id}" style="
+                                background: #ef4444;
+                                color: white;
+                                border: none;
+                                padding: 0.5rem 1rem;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-size: 0.9rem;
+                                transition: background 0.3s;
+                            ">🗑️ Usuń</button>
+                        </div>
+                    `;
+                    
+                    section.appendChild(reviewDiv);
+                });
+                
+                container.appendChild(section);
+            });
+            
+            // Dodaj listenery do przycisków usuwania
+            document.querySelectorAll('.delete-review-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!confirm('Czy na pewno chcesz usunąć tę recenzję?')) return;
+                    
+                    const reviewId = this.dataset.reviewId;
+                    
+                    fetch(`/api/reviews?review_id=${reviewId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Recenzja usunięta!');
+                            location.reload();
+                        } else {
+                            alert('Błąd: ' + (data.error || 'Nie udało się usunąć'));
+                        }
+                    });
+                });
+                
+                btn.addEventListener('mouseover', function() {
+                    this.style.background = '#dc2626';
+                });
+                
+                btn.addEventListener('mouseout', function() {
+                    this.style.background = '#ef4444';
+                });
+            });
+            
+            if (container.children.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 3rem; color: #94a3b8;">Brak recenzji do wyświetlenia</p>';
+            }
+        });
+    });
+</script>
+</body>
+</html>

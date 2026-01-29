@@ -40,6 +40,8 @@ if ($method === 'POST' && !isset($_GET['action'])) {
     }
     
     $text = trim($data['text'] ?? '');
+    
+    // FILTR 1: Blacklista obraźliwych słów
     $blacklist = ['kurwa','chuj','debil','idiota','pizda','cwel','nigger'];
     
     foreach ($blacklist as $bad) {
@@ -52,6 +54,38 @@ if ($method === 'POST' && !isset($_GET['action'])) {
             exit;
         }
     }
+    
+    // FILTR 2: Za krótkie recenzje (jeśli user wpisał tekst)
+    if ($text !== '' && strlen($text) < 3) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "error" => "Recenzja jest za krótka (min. 3 znaków)"
+        ]);
+        exit;
+    }
+    
+    // FILTR 3: Za długie recenzje (spam)
+    if (strlen($text) > 1000) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "error" => "Recenzja jest za długa (max. 1000 znaków)"
+        ]);
+        exit;
+    }
+    
+    // FILTR 4: Powtarzające się znaki (spam typu "aaaaaaa")
+    if (preg_match('/(.)\1{9,}/', $text)) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "error" => "Recenzja zawiera zbyt wiele powtarzających się znaków"
+        ]);
+        exit;
+    }
+    
+    
     
     $stmt = $db->prepare("
         INSERT INTO reviews (item_id, rating, text, date)
@@ -183,7 +217,29 @@ else if ($method === 'GET') {
     exit;
 }
 
+// ===== USUWANIE RECENZJI (ADMIN) =====
+else if ($method === 'DELETE') {
+    $review_id = isset($_GET['review_id']) ? (int)$_GET['review_id'] : 0;
+    
+    if (!$review_id) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "error" => "Brak ID recenzji"]);
+        exit;
+    }
+    
+    // Usuń recenzję
+    $stmt = $db->prepare("DELETE FROM reviews WHERE id = ?");
+    $stmt->execute([$review_id]);
+    
+    // Usuń też like/dislike dla tej recenzji
+    $stmt = $db->prepare("DELETE FROM review_likes WHERE review_id = ?");
+    $stmt->execute([$review_id]);
+    
+    echo json_encode(["success" => true]);
+    exit;
+}
 
+// ===== INNE METODY =====
 else {
     http_response_code(405);
     echo json_encode([
@@ -192,4 +248,3 @@ else {
     ]);
     exit;
 }
-?>

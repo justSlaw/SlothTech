@@ -38,6 +38,10 @@ switch ($route) {
         require_once __DIR__ . '/admin-login.html';
         break;
 
+    case 'admin-reviews':
+        require_once __DIR__ . '/admin-reviews.html';
+        break;
+
     case 'deleteItem':
         require_once __DIR__ . '/../api/deleteItem.php';
         break;
